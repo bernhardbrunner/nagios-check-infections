@@ -1,11 +1,12 @@
 #!/bin/bash - 
-#===============================================================================
+#==========================================================================
 #
 #          FILE:  nagios-check-infections
 # 
 #         Usage:  ./nagios-check-infections
 # 
-#   Description:  Check for security signatures
+#   Description:  Very simple nagios checker for rootkits not covered by 
+#                 tools like rkhunter, chkrootkit etc.
 # 
 #       Options:  ---
 #  Requirements:  ---
@@ -14,15 +15,15 @@
 #        Author: Bernhard Brunner, brb-nagios a-t it-transforms Dot ch
 #       Company: epr.ch
 #       Created: 2012/07/17 22:36
-# Last modified: 2014-02-25 08:09
+# Last modified: 2014-02-25 09:13
 #      Revision:  ---
 #==========================================================================
 #  This program is free software; you can redistribute it and/or modify 
 #  it under the terms of the GNU General Public License as published by 
 #  the Free Software Foundation; either version 2 of the License, or    
-#  (at your option) any later version.                                  
+#  (at your option) any later version.
 #==========================================================================
-#
+
 BASEDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 STATUS_OK="OK"
@@ -35,6 +36,21 @@ resp=""
 function addresp
 {
     resp="$resp $*"
+}
+
+function check_ebury
+{
+   addresp "Ebury:"
+   ipcs -m | grep 666 | awk '
+      BEGIN { ret=1; }
+      { if ($5>3283128) ret=0;
+        ret=1
+      }
+      END { exit ret}' 
+   if [ $? == 0 ] ; then
+       addresp "Possible infection"
+       status=$STATUS_CRIT
+   fi
 }
 
 function check_cdorked
@@ -55,49 +71,47 @@ function check_cdorked
 
 function check_ebury
 {
-   addresp "Ebury:"
-   ipcs -m | grep 666 | awk '
-      BEGIN { ret=1; }
-      { if ($5>3283128) ret=0;
+    addresp "Ebury:"
+    ipcs -m | grep 666 | awk '
+    BEGIN { ret=1; }
+    { if ($5>3283128) ret=0;
         ret=1
-      }
-      END { exit ret}' 
-   if [ $? == 0 ] ; then
-       addresp "Possible infection"
-       status=$STATUS_CRIT
-   fi
+    }
+    END { exit ret}' 
+    if [ $? == 0 ] ; then
+        addresp "Possible infection"
+        status=$STATUS_CRIT
+    fi
 }
 
 function check_darkleech
 {
     addresp "Darkleech:"
     ROOT=$(egrep -hR '^\s*ServerRoot' /etc/apache2/ | sed -e 's/\s*ServerRoot\s*//' -e 's/"//g')
+    infected=
 
-infected=
-
-for M in $(egrep -h -R '^\s*LoadModule' /etc/apache2/ | cut -d" " -f3-100); do
+    for M in $(egrep -h -R '^\s*LoadModule' /etc/apache2/ | cut -d" " -f3-100); do
         FULL=""
         case "$M" in
-                /*)
-                        FULL=$M
-                        ;;
-                *)
-                        FULL=$ROOT/$M
-                        ;;
+            /*)
+                FULL=$M
+                ;;
+            *)
+                FULL=$ROOT/$M
+                ;;
         esac
- #       echo "Checking module $FULL"
+        #       echo "Checking module $FULL"
         if [ -f "$FULL" ]; then
-                if $(strings "$FULL" | grep -q C_ARRAY_TAGS_FOR_INJECT); then
-                        status=$STATUS_CRIT
-                        addresp "$FULL infected!"
-#                        infected="$infected,$FULL"
-                fi
+            if $(strings "$FULL" | grep -q C_ARRAY_TAGS_FOR_INJECT); then
+                status=$STATUS_CRIT
+                addresp "$FULL infected!"
+                #                        infected="$infected,$FULL"
+            fi
         else
-                echo "Module does not exists!"
+            echo "Module does not exists!"
         fi
-done
-
-#echo Infected modules: [$infected]
+    done
+    #echo Infected modules: [$infected]
 }
 ##################################################################
 

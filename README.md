@@ -1,6 +1,6 @@
 nagios-check-infections
 =======================
-Last modified: 2014-02-25 08:23
+Last modified: 2014-02-25 09:25
 Author: Bernhard Brunner
 
 Nagios plugin to check for infections of new, in-the-wild root kits not covered by chkrootkit, rkhunter etc.
@@ -20,15 +20,15 @@ Adding the check to nagios3
 
 Define a new command ssh_check_infections:
 
-<code>
+````
   # 'ssh_infections command definition
   define command
   →   command_name ssh_check_infections
   →   command_line /usr/lib/nagios/plugins/check_by_ssh -p $_HOSTSSHPORT$ -t 30 -H $HOSTADDRESS$ -C   "/usr/local/bin/nagios-check-infections"
   }
-</code>
+````
 
-<code>
+````
   # Define a service to check for infections
   define service{
           use                             generic-service         ; Name of service template to use
@@ -36,5 +36,5 @@ Define a new command ssh_check_infections:
           service_description             Infections
           check_command                   ssh_check_infections
   }
-</code>
+````
 
