@@ -20,18 +20,21 @@ Adding the check to nagios3
 
 Define a new command ssh_check_infections:
 
-# 'ssh_infections command definition
-define command
-→   command_name ssh_check_infections
-→   command_line /usr/lib/nagios/plugins/check_by_ssh -p $_HOSTSSHPORT$ -t 30 -H $HOSTADDRESS$ -C "/usr/local/bin/nagios-check-infections"
-}
+<code>
+  # 'ssh_infections command definition
+  define command
+  →   command_name ssh_check_infections
+  →   command_line /usr/lib/nagios/plugins/check_by_ssh -p $_HOSTSSHPORT$ -t 30 -H $HOSTADDRESS$ -C   "/usr/local/bin/nagios-check-infections"
+  }
+</code>
 
-# Define a service to check for infections
-define service{
-        use                             generic-service         ; Name of service template to use
-        hostgroup_name                  linux-servers
-        service_description             Infections
-        check_command                   ssh_check_infections
-        }
-
+<code>
+  # Define a service to check for infections
+  define service{
+          use                             generic-service         ; Name of service template to use
+          hostgroup_name                  linux-servers
+          service_description             Infections
+          check_command                   ssh_check_infections
+  }
+</code>
 
