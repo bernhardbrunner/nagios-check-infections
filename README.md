@@ -22,6 +22,7 @@ Define a new command ssh_check_infections:
 
 ````
   # 'ssh_infections command definition
+  # note: the host variable _SSHPORT is used to allow non-standard ssh ports
   define command
   →   command_name ssh_check_infections
   →   command_line /usr/lib/nagios/plugins/check_by_ssh -p $_HOSTSSHPORT$ -t 30 -H $HOSTADDRESS$ -C   "/usr/local/bin/nagios-check-infections"
