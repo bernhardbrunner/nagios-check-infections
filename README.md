@@ -1,12 +1,12 @@
 nagios-check-infections
 =======================
-Last modified: 2014-02-25 09:25
+Last modified: 2014-03-10 07:09
 Author: Bernhard Brunner
 
 Nagios plugin to check for infections of new, in-the-wild root kits not covered by chkrootkit, rkhunter etc.
 
 Currently, this nagios plugin checks for the following rootkits:
-- cdorked using an external c program
+- cdorked using an external c program. See the original blog post http://www.welivesecurity.com/2013/04/26/linuxcdorked-new-apache-backdoor-in-the-wild-serves-blackhole/ for more information. 
 - ebury
 - darkleech
 
